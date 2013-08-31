@@ -1,4 +1,10 @@
 <html>
+  <script type="text/javascript" src="js/classes/point.class.js"></script>
+  <script type="text/javascript" src="js/classes/edge.class.js"></script>
+  <script type="text/javascript" src="js/classes/shape.class.js"></script>
+  <script type="text/javascript" src="js/classes/playershape.class.js"></script>
+  <script type="text/javascript" src="js/randomshapegenerator.js"></script>
+  <script type="text/javascript" src="js/usershapes.js"></script>
   <script type="text/javascript" src="js/kalingrad.js"></script>
   <script src="http://localhost:8080/skewer"></script>
 <body>
@@ -7,15 +13,13 @@
       body{
         background-color: black;
       }
-      #game_canvas{
+      canvas{
         border: black 3px solid;
        
       }
-      #game_canvas2{        border: black 3px solid;
-      }
     </style>
-    <canvas id="game_canvas" width="400" height="400"></canvas>
-    <canvas id="game_canvas2" width="400" height="400"></canvas>
+    <canvas id="player_screen" width="400" height="400"></canvas>
+    <canvas id="cpu_screen" width="400" height="400"></canvas>
     
   </div>
   </body>

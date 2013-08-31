@@ -1,7 +1,5 @@
 /*global skewer*/
 
-// Objects
-
 // animation polyfill (iOS < 6 doesn't have animation for example)
 // taken from here http://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
 (function() {
@@ -29,89 +27,8 @@
         };
 }());
 
-var Point = function(x,y){
-	this.x = x;
-	this.y = y;
-};
 
-Point.prototype.intersects = function(point,relativeRadius){
-	// build an imaganary square around the point and check if intersects 
-	var left_x = this.x - relativeRadius;
-	var right_x = this.x + relativeRadius;
-	var top_y = this.y - relativeRadius;
-	var bottom_y = this.y + relativeRadius;
-
-	return ( left_x <= point.x && point.x <= right_x && top_y <= point.y && point.y <= bottom_y );
-
-};
-
-var Edge = function(start,end){
-	this.start = start;
-	this.end = end;
-};
-
-var Shape = function(points,edges){
-	this.points = points;
-	this.edges = edges;
-	this.lastSelectedIndex = -1;
-};
-
-var PlayerShape = function(shape){
-	this.points = shape.points;
-	this.edges = [];
-	this.lastSelectedIndex = -1;
-};
-
-
-function shapeHasEgde(shape,edge){
-	for(var i=0;i<shape.edges.length;i++){
-
-		var curEdge = shape.edges[i];
-		
-		if ( (curEdge.start == edge.start && curEdge.end == edge.end) ||
-			 (curEdge.start == edge.end && curEdge.end == edge.start)){
-			return true;
-		}	
-	}
-	return false;
-}
-
-PlayerShape.prototype.insertEdge = function(edge){
-	if (!shapeHasEgde(this,edge)){
-		this.edges.push(edge);
-		return true;
-	}
-	return false;
-};
-
-
-var UserShapes = {
-	createRect: function(screen){
-		var points = [];
-		var sm = screen.screenMiddle;
-		
-		points[0] = new Point(sm.width - 40,
-							  sm.height - 40);
-		points[1] = new Point(sm.width + 40,
-							  sm.height - 40);
-		points[2] = new Point(sm.width + 40,
-							  sm.height + 40);
-		points[3] = new Point(sm.width - 40,
-							  sm.height + 40);
-
-		var edges = [];
-
-		// connect points by order
-		for(var i=0; i<3; i++){
-			edges[i] = new Edge(i,i+1);
-		}
-
-		// connect last to first
-		edges[3] = new Edge(3,0);
-
-		return new Shape(points,edges);
-	}
-};
+// Objects
 
 // variables for all functions
 var playerScreen = {},
@@ -120,7 +37,7 @@ var playerScreen = {},
 
 
 window.onload = function(){
-	playerScreen.canvas = document.getElementById('game_canvas'),
+	playerScreen.canvas = document.getElementById('player_screen'),
 	playerScreen.canvasContext = playerScreen.canvas.getContext('2d');
 	playerScreen.canvasBoundRect = playerScreen.canvas.getBoundingClientRect();
 
@@ -133,9 +50,6 @@ window.onload = function(){
 		width: playerScreen.screenSize.width / 2,
 		height: playerScreen.screenSize.height / 2
 	};
-
-	var cpuShape = UserShapes.createRect(playerScreen);
-	gameSettings.currentShape = new PlayerShape(cpuShape);
 
 	// mouse move listener
 	playerScreen.canvas.addEventListener('mousemove', function(evt){
@@ -160,30 +74,57 @@ window.onload = function(){
 		return false;
 	}, false);
 
-	// start drawing
-	window.requestAnimationFrame(drawScene);
 
 	// cpu screen
-	cpuScreen.canvas = document.getElementById('game_canvas2');
+	cpuScreen.canvas = document.getElementById('cpu_screen');
 	cpuScreen.canvasContext = cpuScreen.canvas.getContext('2d');
 	cpuScreen.screenSize = playerScreen.screenSize;
 	cpuScreen.screenMiddle = playerScreen.screenMiddle;
 
-	// clear second screen
-	var canvas2 = document.getElementById('game_canvas2');
-	var canvasContext2 = canvas2.getContext('2d');
+	// select a shape
+	selectNextShape();
+	
+	// start drawing
+	window.requestAnimationFrame(drawScene);
 
-	// clear
-	canvasContext2.fillStyle = "white";
-	canvasContext2.fillRect(0,
-							0,
-							playerScreen.screenSize.width,
-							playerScreen.screenSize.width);
-
-	// draw cpu shape
-	drawShape(cpuShape,cpuScreen);
 };
 
+
+function selectNextShape(){
+
+	var cpuShape = UserShapes.createRect(playerScreen);//RandomShapeGenerator.genarateShape(6,playerScreen); //UserShapes.createRect(playerScreen);
+	gameSettings.currentShape = new PlayerShape(cpuShape);
+
+	// clear second screen
+	clearScreen(cpuScreen);
+	// draw cpu shape
+	drawShape(cpuShape,cpuScreen);
+
+	// save cpu shape
+	gameSettings.cpuShape = cpuShape;
+
+}
+
+function checkWin(playerShape,cpuShape){
+
+	// double equality check
+
+	for(var i=0;i<playerShape.edges.length;i++){
+		var curEdge = playerShape.edges[i];
+
+		if (!cpuShape.containgEdge(curEdge)) return false;
+	}
+
+	for(var i=0;i<cpuShape.edges.length;i++){
+		var curEdge = cpuShape.edges[i];
+
+		if (!playerShape.containgEdge(curEdge)) return false;
+	}
+
+	
+
+	return true;
+}
 
 function drawScene(){
 	// clear screen
@@ -217,6 +158,9 @@ function updateMouseClick(mousePosition){
 				if ( gameSettings.currentShape.insertEdge(edge) ){
 					// set next point as start of edge
 					gameSettings.currentShape.lastSelectedIndex = index;
+
+					// check for win
+				 	if ( checkWin(gameSettings.currentShape,gameSettings.cpuShape)) selectNextShape();
 				}
 			} else {
 				gameSettings.currentShape.lastSelectedIndex = index;
