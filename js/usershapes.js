@@ -1,6 +1,5 @@
 var UserShapes = (function(){
 
-
 	var shapeCounter = 0;
 
 	var shapeArr = [//createRect,

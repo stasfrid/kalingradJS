@@ -137,7 +137,6 @@
 	function checkWin(playerShape,cpuShape){
 
 		// double equality check
-
 		for(var i=0;i<playerShape.edges.length;i++){
 			var curEdge = playerShape.edges[i];
 
@@ -146,11 +145,8 @@
 
 		for(var i=0;i<cpuShape.edges.length;i++){
 			var curEdge = cpuShape.edges[i];
-
 			if (!playerShape.containgEdge(curEdge)) return false;
 		}
-
-		
 
 		return true;
 	}

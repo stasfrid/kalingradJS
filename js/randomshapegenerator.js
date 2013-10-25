@@ -1,4 +1,3 @@
-
 /*global Point,Edge,Shape */
 
 (function(){
@@ -35,7 +34,9 @@
 			degrees[currentEdge.start] = ++degrees[currentEdge.start] || 1;
 			degrees[currentEdge.end] = ++degrees[currentEdge.end] || 1;
 		}
-		
+
+
+		console.log(degrees);
 		// check odd degrees
 		var odds = 0;
 		for(i=0;i<degrees.length;i++){
@@ -47,7 +48,7 @@
 
 	function containsEdge(edge){
 		for (var i=0;i<this.length;i++){
-			if (this[i] === edge) return true;
+			if (this[i].equalsTo(edge)) return true;
 		}
 
 		return false;
